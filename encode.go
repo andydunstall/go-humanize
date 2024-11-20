@@ -58,7 +58,7 @@ func (e *encoder) init() {
 		return
 	}
 	if e.indent == 0 {
-		e.indent = 4
+		e.indent = 2
 	}
 	e.emitter.best_indent = e.indent
 	yaml_stream_start_event_initialize(&e.event, yaml_UTF8_ENCODING)
@@ -135,6 +135,17 @@ func (e *encoder) marshal(tag string, in reflect.Value) {
 		return
 	case time.Duration:
 		e.stringv(tag, reflect.ValueOf(value.String()))
+		return
+	case HumanizeMarshaler:
+		v, err := value.MarshalHumanize()
+		if err != nil {
+			fail(err)
+		}
+		if v == nil {
+			e.nilv()
+			return
+		}
+		e.marshal(tag, reflect.ValueOf(v))
 		return
 	case Marshaler:
 		v, err := value.MarshalYAML()

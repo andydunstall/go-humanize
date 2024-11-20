@@ -51,6 +51,10 @@ type Marshaler interface {
 	MarshalYAML() (interface{}, error)
 }
 
+type HumanizeMarshaler interface {
+	MarshalHumanize() (interface{}, error)
+}
+
 // Unmarshal decodes the first document found within the in byte slice
 // and assigns decoded values into the out value.
 //
@@ -546,6 +550,10 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 		info := fieldInfo{Num: i}
 
 		tag := field.Tag.Get("yaml")
+		if tag == "" {
+			// Fall back to JSON if yaml not given.
+			tag = field.Tag.Get("json")
+		}
 		if tag == "" && strings.Index(string(field.Tag), ":") < 0 {
 			tag = string(field.Tag)
 		}
